@@ -39,6 +39,7 @@ class DayColumn extends React.Component {
 
     rtl: PropTypes.bool,
     titleAccessor: accessor,
+    tooltipAccessor: accessor,
     allDayAccessor: accessor.isRequired,
     startAccessor: accessor.isRequired,
     endAccessor: accessor.isRequired,
@@ -166,6 +167,7 @@ class DayColumn extends React.Component {
       step,
       timeslots,
       titleAccessor,
+      tooltipAccessor,
     } = this.props
 
     let styledEvents = getStyledEvents({
@@ -202,6 +204,7 @@ class DayColumn extends React.Component {
       let continuesAfter = startsAfter(end, max)
 
       let title = get(event, titleAccessor)
+      let tooltip = get(event, tooltipAccessor)
       let label
       if (_continuesPrior && _continuesAfter) {
         label = messages.allDay
@@ -221,8 +224,14 @@ class DayColumn extends React.Component {
 
       let { height, top, width, xOffset } = style
 
+      let wrapperProps = {
+        event,
+        continuesPrior: _continuesPrior,
+        continuesAfter: _continuesAfter,
+      }
+
       return (
-        <EventWrapper event={event} key={'evt_' + idx}>
+        <EventWrapper {...wrapperProps} key={'evt_' + idx}>
           <div
             style={{
               ...xStyle,
@@ -231,7 +240,11 @@ class DayColumn extends React.Component {
               [isRtl ? 'right' : 'left']: `${Math.max(0, xOffset)}%`,
               width: `${width}%`,
             }}
-            title={(typeof label === 'string' ? label + ': ' : '') + title}
+            title={
+              tooltip
+                ? (typeof label === 'string' ? label + ': ' : '') + tooltip
+                : undefined
+            }
             onClick={e => this._select(event, e)}
             onDoubleClick={e => this._doubleClick(event, e)}
             className={cn('rbc-event', className, {
